@@ -16,6 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Health Check ---
+@app.get("/health", summary="Health Check", include_in_schema=False)
+async def health_check():
+    return {"status": "healthy"}
+
 # --- Serve the Simulator ---
 @app.get("/", response_class=FileResponse, include_in_schema=False)
 async def read_simulator():

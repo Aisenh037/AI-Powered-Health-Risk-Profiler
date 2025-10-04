@@ -28,6 +28,8 @@ The application follows a modular architecture with the following components:
 
 ### Installation
 
+#### Local Development
+
 1. Clone the repository:
    ```bash
    git clone <repository-url>
@@ -53,6 +55,22 @@ The application follows a modular architecture with the following components:
 5. Access the simulator at `http://127.0.0.1:8000/`
 
 6. API documentation at `http://127.0.0.1:8000/docs`
+
+#### Docker Deployment
+
+1. Build the Docker image:
+   ```bash
+   docker build -t health-risk-profiler .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 10000:10000 health-risk-profiler
+   ```
+
+3. Access the simulator at `http://localhost:10000/`
+
+4. API documentation at `http://localhost:10000/docs`
 
 ## API Usage
 
