@@ -1,4 +1,5 @@
-import easyocr
+import requests
+import base64
 from PIL import Image
 from io import BytesIO
 from typing import Dict, Any, List
@@ -6,8 +7,9 @@ import logging
 import os
 import sys
 
-# Initialize the reader. This is done once when the app starts.
-reader = easyocr.Reader(['en'])
+# OCR configuration (using OCR.space free API)
+OCR_API_KEY = 'helloworld'  # Free public key for demo
+OCR_URL = 'https://api.ocr.space/parse/image'
 
 # Try to import ML classifier
 try:
@@ -21,35 +23,55 @@ except Exception as e:
     logging.warning(f"ML models not available: {e}")
 
 def parse_survey_from_image(image_bytes: bytes) -> Dict[str, Any]:
-    """Extracts key-value pairs from an image using EasyOCR."""
+    """Extracts key-value pairs from an image using OCR.space API."""
     try:
-        results = reader.readtext(image_bytes)
-        text = '\n'.join([res[1] for res in results])
+        # Convert image bytes to base64 for API transmission
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+        
+        payload = {
+            'apikey': OCR_API_KEY,
+            'base64Image': f"data:image/jpeg;base64,{image_base64}",
+            'language': 'eng',
+            'isOverlayRequired': False
+        }
+        
+        response = requests.post(OCR_URL, data=payload, timeout=10)
+        result = response.json()
+        
+        if result.get('OCRExitCode') != 1:
+            error_msg = result.get('ErrorMessage', 'Unknown OCR error')
+            logging.error(f"OCR API Error: {error_msg}")
+            return {"answers": {}, "confidence": 0.0}
+
+        # Extract text from lines
+        text_lines = []
+        parsed_results = result.get('ParsedResults', [])
+        for res in parsed_results:
+            text_lines.extend(res.get('ParsedText', '').split('\n'))
+
         answers = {}
-        confidences = []
-        for res in results:
-            if ':' in res[1]:
-                line = res[1]
-                confidences.append(res[2])
+        for line in text_lines:
+            if ':' in line:
                 key, val = line.split(':', 1)
                 key = key.strip().lower().replace(" ", "").replace("-", "")
                 val = val.strip().lower()
+                
                 if key in ["age"]:
                     try:
                         answers["age"] = int(val)
                     except ValueError:
                         logging.warning(f"Invalid age value: {val}")
                 elif key in ["smoker", "smoking"]:
-                    answers["smoker"] = val in ["yes", "true", "y", "1"]
+                    answers["smoker"] = any(word in val for word in ["yes", "true", "y", "1"])
                 elif key in ["exercise", "activity"]:
                     answers["exercise"] = val
                 elif key in ["diet", "food"]:
                     answers["diet"] = val
-        confidence = sum(confidences) / len(confidences) if confidences else 0.0
-        logging.info(f"Parsed answers from image: {answers}, confidence: {confidence}")
-        return {"answers": answers, "confidence": confidence}
+
+        logging.info(f"Parsed answers from API OCR: {answers}")
+        return {"answers": answers, "confidence": 0.8} # Static confidence for API
     except Exception as e:
-        logging.error(f"OCR Error: {e}")
+        logging.error(f"OCR API Call Error: {e}")
         return {"answers": {}, "confidence": 0.0}
 
 def extract_factors(answers: Dict[str, Any]) -> List[str]:

@@ -1,26 +1,32 @@
 # Use an official, lightweight Python image
 FROM python:3.11-slim
 
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PORT=10000
+
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the file that lists your Python dependencies
-COPY ./requirements.txt /app/requirements.txt
+# Install system dependencies if needed (e.g., for certain ML ops)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install the dependencies
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# This is a key step for performance:
-# We run a small script to pre-download the EasyOCR models
-# so they are included in the package, avoiding slow server startups.
-COPY ./preload_models.py /app/preload_models.py
-RUN python /app/preload_models.py
+# Copy the entire project structure
+COPY . .
 
-# Copy your application code and simulator into the package
-COPY ./app /app/app
-COPY ./main.py /app/main.py
-COPY ./simulator.html /app/simulator.html
+# Train models during build to ensure the image is ready-to-run
+# This ensures ml_models and data are used correctly
+RUN python ml_models/dataset_generator.py && python ml_models/model_trainer.py
 
-# The command to run your application when it starts
-# It listens on all network interfaces (0.0.0.0) on port 7860 for Hugging Face Spaces
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+# Expose the port (Render handles this dynamically, but good for documentation)
+EXPOSE 10000
+
+# Command to run the application
+# Use the PORT environment variable provided by Render
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}

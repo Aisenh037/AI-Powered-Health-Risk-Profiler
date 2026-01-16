@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: health-risk-profiler
+    env: docker
+    repo: https://github.com/Aisenh037/AI-Powered-Health-Risk-Profiler
+    plan: free # Can be 'free' now that we removed easyocr
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
