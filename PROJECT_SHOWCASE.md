@@ -1,6 +1,7 @@
-# AI-Powered Health Risk Profiler - Project Showcase
+# 🏥 AI-Powered Health Risk Profiler - Project Showcase
 
-> **Resume-Ready ML Engineering Project** | **Placement & Interview Ready**
+> **Live Demo**: [https://ai-powered-health-risk-profiler-isvm.onrender.com/docs](https://ai-powered-health-risk-profiler-isvm.onrender.com/docs)  
+> **GitHub Repository**: [View Code](https://github.com/Aisenh037/AI-Powered-Health-Risk-Profiler)
 
 ---
 

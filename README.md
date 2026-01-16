@@ -8,6 +8,17 @@
 
 > Production-ready ML system for cardiovascular health risk assessment using ensemble learning (Random Forest, XGBoost, Neural Network) achieving **95.86% accuracy** with full explainability.
 
+## 🌐 Live Demo
+
+**🚀 API Base URL**: [https://ai-powered-health-risk-profiler-isvm.onrender.com](https://ai-powered-health-risk-profiler-isvm.onrender.com)
+
+**Try it now:**
+- [Health Check](https://ai-powered-health-risk-profiler-isvm.onrender.com/health)
+- [Interactive API Docs](https://ai-powered-health-risk-profiler-isvm.onrender.com/docs)
+- [Model Performance](https://ai-powered-health-risk-profiler-isvm.onrender.com/model-info)
+
+**Status**: ✅ Live and running
+
 ![API Demo](docs/images/api_demo.png)
 
 ---
