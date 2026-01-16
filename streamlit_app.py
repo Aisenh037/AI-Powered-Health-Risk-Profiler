@@ -13,47 +13,44 @@ from typing import Dict, Any
 # Configuration
 st.set_page_config(
     page_title="AI Health Risk Profiler",
-    page_icon="🩺",
+    page_icon="🏥",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # API Configuration
-API_URL = st.secrets.get("API_URL", "http://127.0.0.1:8000")  # Change after deployment
+API_URL = st.secrets.get("API_URL", "http://127.0.0.1:8000")
 
-# Custom CSS for better styling
+# Custom CSS for minimalist professional styling
 st.markdown("""
 <style>
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #1f77b4;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    .sub-header {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        margin-bottom: 2rem;
+    }
+    .metric-container {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         text-align: center;
         margin-bottom: 1rem;
     }
-    .sub-header {
-        font-size: 1.2rem;
-        color: #666;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-    }
-    .risk-high {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    .risk-medium {
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        color: #333 !important;
-    }
-    .risk-low {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        color: #333 !important;
+    .stButton>button {
+        width: 100%;
+        border-radius: 4px;
+        height: 3rem;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -91,26 +88,27 @@ def predict_health_risk(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def create_risk_gauge(risk_score: float, risk_level: str) -> go.Figure:
-    """Create a gauge chart for risk score"""
+    """Create a professional gauge chart for risk score"""
+    colors = {'low': '#2ecc71', 'medium': '#f39c12', 'high': '#e74c3c'}
+    
     fig = go.Figure(go.Indicator(
-        mode="gauge+number+delta",
+        mode="gauge+number",
         value=risk_score,
         domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': "Risk Score", 'font': {'size': 24}},
-        delta={'reference': 50},
+        title={'text': "Risk Score", 'font': {'size': 20, 'color': '#2c3e50'}},
         gauge={
-            'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
-            'bar': {'color': "darkblue"},
+            'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "#7f8c8d"},
+            'bar': {'color': "#2c3e50"},
             'bgcolor': "white",
-            'borderwidth': 2,
-            'bordercolor': "gray",
+            'borderwidth': 1,
+            'bordercolor': "#e0e0e0",
             'steps': [
-                {'range': [0, 30], 'color': '#a8edea'},
-                {'range': [30, 60], 'color': '#ffecd2'},
-                {'range': [60, 100], 'color': '#f5576c'}
+                {'range': [0, 30], 'color': '#ebfbf0'},  # Very light green
+                {'range': [30, 60], 'color': '#fef7e6'}, # Very light orange
+                {'range': [60, 100], 'color': '#fdedec'} # Very light red
             ],
             'threshold': {
-                'line': {'color': "red", 'width': 4},
+                'line': {'color': colors.get(risk_level, '#2c3e50'), 'width': 4},
                 'thickness': 0.75,
                 'value': risk_score
             }
@@ -119,19 +117,18 @@ def create_risk_gauge(risk_score: float, risk_level: str) -> go.Figure:
     
     fig.update_layout(
         height=300,
-        margin=dict(l=20, r=20, t=50, b=20),
-        paper_bgcolor="rgba(0,0,0,0)",
-        font={'color': "darkblue", 'family': "Arial"}
+        margin=dict(l=20, r=20, t=40, b=20),
+        font={'family': "Arial, sans-serif"}
     )
     
     return fig
 
 
 def create_probability_chart(probabilities: Dict[str, float]) -> go.Figure:
-    """Create bar chart for probability distribution"""
-    categories = list(probabilities.keys())
-    values = [probabilities[cat] * 100 for cat in categories]
-    colors = ['#a8edea', '#ffecd2', '#f5576c']
+    """Create professional bar chart for probability distribution"""
+    categories = [k.capitalize() for k in probabilities.keys()]
+    values = [probabilities[k.lower()] * 100 for k in categories]
+    colors = ['#2ecc71', '#f39c12', '#e74c3c']
     
     fig = go.Figure(data=[
         go.Bar(
@@ -140,16 +137,19 @@ def create_probability_chart(probabilities: Dict[str, float]) -> go.Figure:
             marker_color=colors,
             text=[f"{v:.1f}%" for v in values],
             textposition='auto',
+            width=0.5
         )
     ])
     
     fig.update_layout(
-        title="Probability Distribution",
-        xaxis_title="Risk Level",
+        title="Prediction Probabilities",
+        xaxis_title="Risk Category",
         yaxis_title="Probability (%)",
         height=300,
-        margin=dict(l=20, r=20, t=50, b=20),
-        yaxis=dict(range=[0, 100])
+        margin=dict(l=20, r=20, t=40, b=20),
+        yaxis=dict(range=[0, 100]),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     
     return fig
@@ -157,28 +157,25 @@ def create_probability_chart(probabilities: Dict[str, float]) -> go.Figure:
 
 def create_feature_importance_chart(factors: list) -> go.Figure:
     """Create horizontal bar chart for feature importance"""
-    features = [f['feature'] for f in factors]
+    features = [f['feature'].replace('_', ' ').title() for f in factors]
     importances = [f['importance'] * 100 for f in factors]
     
     fig = go.Figure(go.Bar(
         x=importances,
         y=features,
         orientation='h',
-        marker=dict(
-            color=importances,
-            colorscale='Viridis',
-            showscale=True
-        ),
+        marker=dict(color='#3498db'),
         text=[f"{imp:.1f}%" for imp in importances],
         textposition='auto',
     ))
     
     fig.update_layout(
-        title="Top Contributing Risk Factors",
-        xaxis_title="Importance (%)",
-        yaxis_title="Health Factor",
+        title="Key Contributing Factors",
+        xaxis_title="Impact (%)",
         height=300,
-        margin=dict(l=20, r=20, t=50, b=20)
+        margin=dict(l=20, r=20, t=40, b=20),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     
     return fig
@@ -187,43 +184,31 @@ def create_feature_importance_chart(factors: list) -> go.Figure:
 # Main App
 def main():
     # Header
-    st.markdown('<div class="main-header">🩺 AI-Powered Health Risk Profiler</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Health Risk Profiler</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="sub-header">ML-powered cardiovascular risk assessment with 95.86% accuracy</div>',
+        '<div class="sub-header">Professional cardiovascular risk assessment system using ensemble machine learning</div>',
         unsafe_allow_html=True
     )
     
     # Check API health
     if not check_api_health():
-        st.error("⚠️ **Backend API is not available.** Please ensure the FastAPI server is running.")
-        st.info(f"Looking for API at: `{API_URL}`")
+        st.error("Backend API is unavailable. Please check connection.")
         st.stop()
     
     # Sidebar
     with st.sidebar:
-        st.header("⚙️ Configuration")
+        st.header("Configuration")
         
         # API status
-        st.success("✅ Backend API Connected")
+        st.caption("System Status")
+        st.success("Connected")
         
-        # Model info
-        with st.expander("📊 Model Performance", expanded=False):
-            model_info = get_model_info()
-            if model_info:
-                st.metric("Models Loaded", len(model_info.get('models_loaded', [])))
-                
-                for model_name, metrics in model_info.get('performance', {}).items():
-                    st.markdown(f"**{model_name.replace('_', ' ').title()}**")
-                    col1, col2 = st.columns(2)
-                    col1.metric("Accuracy", f"{metrics['accuracy']*100:.1f}%")
-                    col2.metric("F1 Score", f"{metrics['f1_score']:.3f}")
-        
-        st.markdown("---")
+        st.divider()
         
         # Quick test profiles
-        st.header("🧪 Quick Test Profiles")
+        st.subheader("Test Profiles")
         
-        if st.button("High Risk Profile", use_container_width=True):
+        if st.button("Load High Risk Profile"):
             st.session_state.update({
                 'age': 55, 'bmi': 32.0, 'systolic_bp': 160, 'cholesterol': 260,
                 'smoker': True, 'exercise': 'never', 'diet': 'high fat',
@@ -231,274 +216,172 @@ def main():
                 'stress_level': 9
             })
         
-        if st.button("Low Risk Profile", use_container_width=True):
+        if st.button("Load Low Risk Profile"):
             st.session_state.update({
                 'age': 28, 'bmi': 22.0, 'systolic_bp': 110, 'cholesterol': 170,
                 'smoker': False, 'exercise': 'daily', 'diet': 'balanced',
                 'family_history': False, 'sleep_hours': 8.0, 'alcohol': 'none',
                 'stress_level': 2
             })
+            
+        st.divider()
         
-        st.markdown("---")
-        st.markdown("Built with ❤️ using FastAPI + Streamlit")
+        # Model info in sidebar
+        with st.expander("Model Architecture"):
+            st.caption("Ensemble Model Performance")
+            model_info = get_model_info()
+            if model_info:
+                for model_name, metrics in model_info.get('performance', {}).items():
+                    st.text(f"{model_name.replace('_', ' ').title()}")
+                    st.progress(metrics['accuracy'])
+                    st.caption(f"Accuracy: {metrics['accuracy']*100:.1f}%")
+
     
-    # Main content
-    tab1, tab2, tab3 = st.tabs(["🏥 Health Assessment", "📊 About Models", "ℹ️ How It Works"])
+    # Main content tabs
+    tab1, tab2, tab3 = st.tabs(["Assessment", "Model Details", "Documentation"])
     
     with tab1:
-        st.header("Enter Health Information")
+        st.subheader("Patient Data Entry")
         
         # Create form
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.subheader("📏 Physical Metrics")
-            age = st.number_input("Age", min_value=18, max_value=100, 
-                                 value=st.session_state.get('age', 45), key='age')
-            bmi = st.number_input("BMI", min_value=15.0, max_value=50.0, 
-                                 value=st.session_state.get('bmi', 25.0), step=0.1, key='bmi')
-            systolic_bp = st.number_input("Systolic Blood Pressure", min_value=90, max_value=200,
-                                         value=st.session_state.get('systolic_bp', 120), key='systolic_bp')
-            cholesterol = st.number_input("Cholesterol (mg/dL)", min_value=100, max_value=400,
-                                         value=st.session_state.get('cholesterol', 200), key='cholesterol')
-        
-        with col2:
-            st.subheader("🚬 Lifestyle Factors")
-            smoker = st.checkbox("Smoker", value=st.session_state.get('smoker', False), key='smoker')
-            exercise = st.selectbox("Exercise Frequency", 
-                                   ['never', 'rarely', 'occasionally', 'regularly', 'daily'],
-                                   index=['never', 'rarely', 'occasionally', 'regularly', 'daily'].index(
-                                       st.session_state.get('exercise', 'occasionally')), key='exercise')
-            diet = st.selectbox("Diet Quality",
-                               ['poor', 'average', 'good', 'balanced', 'high fat', 'high sugar'],
-                               index=['poor', 'average', 'good', 'balanced', 'high fat', 'high sugar'].index(
-                                   st.session_state.get('diet', 'balanced')), key='diet')
-            alcohol = st.selectbox("Alcohol Consumption",
-                                  ['none', 'light', 'moderate', 'heavy'],
-                                  index=['none', 'light', 'moderate', 'heavy'].index(
-                                      st.session_state.get('alcohol', 'light')), key='alcohol')
-        
-        with col3:
-            st.subheader("🧬 Health History")
-            family_history = st.checkbox("Family History of Heart Disease",
-                                        value=st.session_state.get('family_history', False), key='family_history')
-            sleep_hours = st.slider("Average Sleep (hours/night)", 3.0, 12.0,
-                                   value=st.session_state.get('sleep_hours', 7.0), step=0.5, key='sleep_hours')
-            stress_level = st.slider("Stress Level (1-10)", 1, 10,
-                                    value=st.session_state.get('stress_level', 5), key='stress_level')
-        
-        # Predict button
-        st.markdown("---")
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            predict_button = st.button("🔮 Assess Health Risk", use_container_width=True, type="primary")
+        with st.form("risk_assessment_form"):
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.markdown("**Physical Metrics**")
+                age = st.number_input("Age (years)", min_value=18, max_value=100, 
+                                     value=st.session_state.get('age', 45))
+                bmi = st.number_input("BMI", min_value=15.0, max_value=50.0, 
+                                     value=st.session_state.get('bmi', 25.0), step=0.1)
+                systolic_bp = st.number_input("Systolic BP (mmHg)", min_value=90, max_value=200,
+                                             value=st.session_state.get('systolic_bp', 120))
+                cholesterol = st.number_input("Cholesterol (mg/dL)", min_value=100, max_value=400,
+                                             value=st.session_state.get('cholesterol', 200))
+            
+            with col2:
+                st.markdown("**Lifestyle Indicators**")
+                smoker = st.checkbox("Current Smoker", value=st.session_state.get('smoker', False))
+                exercise = st.selectbox("Exercise Frequency", 
+                                       ['never', 'rarely', 'occasionally', 'regularly', 'daily'],
+                                       index=['never', 'rarely', 'occasionally', 'regularly', 'daily'].index(
+                                           st.session_state.get('exercise', 'occasionally')))
+                diet = st.selectbox("Diet Quality",
+                                   ['poor', 'average', 'good', 'balanced', 'high fat', 'high sugar'],
+                                   index=['poor', 'average', 'good', 'balanced', 'high fat', 'high sugar'].index(
+                                       st.session_state.get('diet', 'balanced')))
+                alcohol = st.selectbox("Alcohol Consumption",
+                                      ['none', 'light', 'moderate', 'heavy'],
+                                      index=['none', 'light', 'moderate', 'heavy'].index(
+                                          st.session_state.get('alcohol', 'light')))
+            
+            with col3:
+                st.markdown("**Medical History**")
+                family_history = st.checkbox("Family History of Heart Disease",
+                                            value=st.session_state.get('family_history', False))
+                sleep_hours = st.slider("Daily Sleep (hours)", 3.0, 12.0,
+                                       value=st.session_state.get('sleep_hours', 7.0), step=0.5)
+                stress_level = st.slider("Stress Level (Self-reported 1-10)", 1, 10,
+                                        value=st.session_state.get('stress_level', 5))
+            
+            st.markdown("---")
+            submit_button = st.form_submit_button("Analyze Risk Profile", type="primary", use_container_width=True)
         
         # Make prediction
-        if predict_button:
-            with st.spinner("🤖 Analyzing health data with ML models..."):
-                # Prepare data
+        if submit_button:
+            with st.spinner("Processing data..."):
                 input_data = {
-                    "age": age,
-                    "bmi": bmi,
-                    "systolic_bp": systolic_bp,
-                    "cholesterol": cholesterol,
-                    "smoker": smoker,
-                    "exercise": exercise,
-                    "diet": diet,
-                    "family_history": family_history,
-                    "sleep_hours": sleep_hours,
-                    "alcohol": alcohol,
-                    "stress_level": stress_level
+                    "age": age, "bmi": bmi, "systolic_bp": systolic_bp, "cholesterol": cholesterol,
+                    "smoker": smoker, "exercise": exercise, "diet": diet,
+                    "family_history": family_history, "sleep_hours": sleep_hours,
+                    "alcohol": alcohol, "stress_level": stress_level
                 }
                 
-                # Get prediction
                 result = predict_health_risk(input_data)
                 
                 if "error" in result:
-                    st.error(f"❌ Error: {result['error']}")
+                    st.error(f"Error: {result['error']}")
                 else:
-                    st.success("✅ Analysis Complete!")
+                    # Display results in a clean layout
+                    st.markdown("### Analysis Results")
                     
-                    # Display results
-                    st.markdown("---")
-                    st.header("📋 Risk Assessment Results")
-                    
-                    # Risk level banner
                     risk_level = result['risk_level']
-                    risk_score = result['risk_score']
                     confidence = result['confidence']
+                    risk_score = result['risk_score']
                     
-                    risk_class = f"risk-{risk_level}"
-                    emoji = {"low": "✅", "medium": "⚠️", "high": "🚨"}
+                    # Result Banner
+                    color_map = {"low": "#27ae60", "medium": "#f39c12", "high": "#c0392b"}
+                    bg_color = color_map.get(risk_level, "#34495e")
                     
                     st.markdown(f"""
-                    <div class="metric-card {risk_class}">
-                        <h1>{emoji.get(risk_level, '⚠️')} {risk_level.upper()} RISK</h1>
-                        <h3>Confidence: {confidence*100:.1f}%</h3>
+                    <div style="background-color: {bg_color}; color: white; padding: 1rem; border-radius: 5px; margin-bottom: 2rem; text-align: center;">
+                        <h2 style="margin:0; font-family: sans-serif;">{risk_level.upper()} RISK DETECTED</h2>
+                        <p style="margin:0; opacity: 0.9;">Confidence Level: {confidence*100:.1f}%</p>
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    st.markdown("---")
+                    # Columns for charts
+                    col_metrics, col_chart = st.columns([1, 1])
                     
-                    # Visualizations
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        # Risk gauge
+                    with col_metrics:
                         fig_gauge = create_risk_gauge(risk_score, risk_level)
                         st.plotly_chart(fig_gauge, use_container_width=True)
                         
-                        # Model predictions
-                        st.subheader("🤖 Model Consensus")
-                        model_preds = result.get('model_predictions', {})
-                        for model, pred in model_preds.items():
-                            pred_emoji = emoji.get(pred, '⚠️')
-                            st.markdown(f"**{model.replace('_', ' ').title()}**: {pred_emoji} {pred.upper()}")
+                        st.markdown("#### Top Risk Contributors")
+                        factors = result.get('top_contributing_factors', [])
+                        if factors:
+                            for factor in factors:
+                                name = factor['feature'].replace('_', ' ').title()
+                                importance = factor['importance'] * 100
+                                st.progress(factor['importance'], text=f"{name} ({importance:.1f}%)")
                     
-                    with col2:
-                        # Probability distribution
+                    with col_chart:
                         probabilities = result.get('probabilities', {})
                         fig_prob = create_probability_chart(probabilities)
                         st.plotly_chart(fig_prob, use_container_width=True)
-                    
-                    # Feature importance
-                    st.markdown("---")
-                    st.subheader("🔍 Top Risk Factors")
-                    factors = result.get('top_contributing_factors', [])
-                    
-                    if factors:
-                        fig_factors = create_feature_importance_chart(factors)
-                        st.plotly_chart(fig_factors, use_container_width=True)
                         
-                        # Detailed breakdown
-                        with st.expander("📝 Detailed Factor Analysis"):
-                            for factor in factors:
-                                st.markdown(f"- **{factor['feature'].replace('_', ' ').title()}**: "
-                                          f"{factor['importance']*100:.1f}% contribution")
+                        st.markdown("#### Model Consensus")
+                        model_preds = result.get('model_predictions', {})
+                        for model, pred in model_preds.items():
+                            st.write(f"**{model.replace('_', ' ').title()}**: {pred.upper()}")
                     
-                    # Recommendations (placeholder)
+                    # Recommendations
                     st.markdown("---")
-                    st.subheader("💡 Health Recommendations")
+                    st.subheader("Clinical Recommendations")
                     
                     if risk_level == "high":
-                        st.warning("""
-                        **Based on your risk profile, consider:**
-                        - 🏥 Consult with a healthcare provider immediately
-                        - 🚭 Quit smoking if applicable
-                        - 🏃 Increase physical activity to at least 30 minutes daily
-                        - 🥗 Adopt a heart-healthy diet (Mediterranean style)
-                        - 💊 Monitor blood pressure and cholesterol regularly
-                        - 😌 Manage stress through meditation or counseling
-                        """)
+                        st.warning("⚠️ Immediate clinical consultation recommended. Monitor cardiovascular metrics.")
                     elif risk_level == "medium":
-                        st.info("""
-                        **To reduce your risk:**
-                        - 🏃 Exercise at least 150 minutes per week
-                        - 🥗 Improve diet quality with more fruits and vegetables
-                        - 😴 Ensure 7-8 hours of quality sleep
-                        - 🧘 Practice stress management techniques
-                        - 📊 Regular health check-ups
-                        """)
+                        st.info("ℹ️ Lifestyle modification recommended. Follow up in 3-6 months.")
                     else:
-                        st.success("""
-                        **Keep up the good work!**
-                        - ✅ Maintain your healthy lifestyle
-                        - 🏃 Continue regular exercise
-                        - 🥗 Keep eating a balanced diet
-                        - 😴 Maintain good sleep habits
-                        - 📊 Annual health check-ups for monitoring
-                        """)
-    
+                        st.success("✅ Maintain current healthy lifestyle habits. Standard annual check-up.")
+
     with tab2:
-        st.header("📊 About the ML Models")
-        
+        st.subheader("Model Performance Metrics")
         st.markdown("""
-        This health risk profiler uses an **ensemble of three machine learning models** 
-        trained on 10,000 synthetic health records to predict cardiovascular risk.
+        The system utilizes an ensemble of three distinct machine learning architectures:
+        1.  **Random Forest**: For robust feature importance analysis.
+        2.  **XGBoost**: Gradient boosting for high predictive accuracy.
+        3.  **Neural Network**: Multilayer Perceptron for complex pattern recognition.
         """)
         
         col1, col2, col3 = st.columns(3)
-        
         with col1:
-            st.markdown("""
-            ### 🌳 Random Forest
-            - **Accuracy**: 88.20%
-            - **F1 Score**: 0.8761
-            - **ROC-AUC**: 0.9592
-            
-            Provides feature importance for explainability.
-            """)
-        
+            st.metric("Random Forest Accuracy", "88.2%")
         with col2:
-            st.markdown("""
-            ### 🚀 XGBoost
-            - **Accuracy**: 93.25%
-            - **F1 Score**: 0.9299
-            - **ROC-AUC**: 0.9865
-            
-            Gradient boosting for high accuracy.
-            """)
-        
+            st.metric("XGBoost Accuracy", "93.3%")
         with col3:
-            st.markdown("""
-            ### 🧠 Neural Network
-            - **Accuracy**: 95.86%
-            - **F1 Score**: 0.9586
-            - **ROC-AUC**: 0.9945
+            st.metric("Neural Network Accuracy", "95.9%")
             
-            Deep learning for complex patterns.
-            """)
-        
-        st.markdown("---")
-        st.markdown("""
-        ### Ensemble Method
-        
-        Predictions are combined using **weighted averaging**:
-        - XGBoost: 40% weight
-        - Random Forest: 35% weight
-        - Neural Network: 25% weight
-        
-        This approach improves robustness and reduces overfitting.
-        """)
-    
     with tab3:
-        st.header("ℹ️ How It Works")
-        
+        st.subheader("System Documentation")
         st.markdown("""
-        ## 🔄 Prediction Pipeline
+        ### Methodology
+        This tool aggregates inputs across 3 vectors (Physical, Lifestyle, Medical History) to generate a composite risk score.
         
-        1. **Input Collection**: You provide health metrics and lifestyle information
-        2. **Data Preprocessing**: Values are standardized and encoded
-        3. **ML Inference**: Three models make independent predictions
-        4. **Ensemble**: Predictions are combined with weighted averaging
-        5. **Explainability**: Feature importance shows which factors matter most
-        6. **Results**: Risk level, score, confidence, and recommendations
+        **Privacy Note**: Use compliant data handling practices. No PII is stored.
         
-        ## 🎯 Risk Levels
-        
-        - **Low Risk (0-30)**: Healthy profile, low probability of cardiovascular events
-        - **Medium Risk (30-60)**: Some risk factors present, lifestyle changes recommended
-        - **High Risk (60-100)**: Multiple risk factors, medical consultation advised
-        
-        ## 🔍 Key Features Analyzed
-        
-        - Physical metrics (age, BMI, blood pressure, cholesterol)
-        - Lifestyle factors (smoking, exercise, diet, alcohol)
-        - Health history (family history, sleep, stress)
-        
-        ## ⚡ Performance
-        
-        - **Accuracy**: 95.86% on test set
-        - **Response Time**: <500ms
-        - **Confidence**: Provided for transparency
-        
-        ## 🔒 Privacy
-        
-        - No data is stored permanently
-        - All predictions are stateless
-        - HIPAA-compliant design (when deployed with proper infrastructure)
+        **Version**: 1.0.0-Production
         """)
-
 
 if __name__ == "__main__":
     main()
