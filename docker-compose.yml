@@ -4,10 +4,10 @@ services:
   health-risk-profiler:
     build: .
     ports:
-      - "10000:10000"
+      - "7860:7860"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 # Input schema for JSON requests
 class SurveyInput(BaseModel):
@@ -37,3 +37,33 @@ class Recommendations(BaseModel):
 class IncompleteProfileError(BaseModel):
     status: str
     reason: str
+
+# ML Prediction Schemas
+class MLPredictionInput(BaseModel):
+    age: int
+    bmi: Optional[float] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    systolic_bp: int = 120
+    cholesterol: int = 200
+    smoker: bool = False
+    exercise: str = "occasionally"
+    diet: str = "balanced"
+    family_history: bool = False
+    sleep_hours: float = 7.0
+    alcohol: str = "none"
+    stress_level: int = 5
+
+class MLPredictionResponse(BaseModel):
+    risk_level: str
+    risk_score: float
+    confidence: float
+    probabilities: Dict[str, float]
+    model_predictions: Dict[str, str]
+    top_contributing_factors: Optional[List[Dict[str, Any]]] = None
+    status: str = "ok"
+
+class ModelInfo(BaseModel):
+    models_loaded: List[str]
+    timestamp: str
+    performance: Dict[str, Dict[str, float]]

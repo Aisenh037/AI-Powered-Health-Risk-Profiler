@@ -3,9 +3,22 @@ from PIL import Image
 from io import BytesIO
 from typing import Dict, Any, List
 import logging
+import os
+import sys
 
 # Initialize the reader. This is done once when the app starts.
 reader = easyocr.Reader(['en'])
+
+# Try to import ML classifier
+try:
+    # Add parent directory to path to import from ml_models
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+    from ml_models.risk_classifier import get_classifier, predict_risk
+    ML_AVAILABLE = True
+    logging.info("ML models loaded successfully")
+except Exception as e:
+    ML_AVAILABLE = False
+    logging.warning(f"ML models not available: {e}")
 
 def parse_survey_from_image(image_bytes: bytes) -> Dict[str, Any]:
     """Extracts key-value pairs from an image using EasyOCR."""
@@ -70,3 +83,20 @@ def generate_recommendations(risk_level: str, factors: List[str]) -> Dict[str, A
     """Generates actionable recommendations based on factors."""
     recs = [RECOMMENDATION_MAP.get(factor) for factor in factors if factor in RECOMMENDATION_MAP]
     return {"risk_level": risk_level, "factors": factors, "recommendations": recs, "status": "ok"}
+
+# ML Prediction Functions
+def predict_health_risk_ml(answers: Dict[str, Any]) -> Dict[str, Any]:
+    """ML-based health risk prediction with explainability."""
+    if not ML_AVAILABLE:
+        return {"error": "ML models not available. Please train models first."}
+    
+    try:
+        result = predict_risk(answers)
+        return result
+    except Exception as e:
+        logging.error(f"ML prediction error: {e}")
+        return {"error": f"ML prediction failed: {str(e)}"}
+
+def is_ml_available() -> bool:
+    """Check if ML models are available."""
+    return ML_AVAILABLE
