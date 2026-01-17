@@ -1,9 +1,0 @@
-- [x] Update app/main.py: Change survey_data parameter from Form to Body using Optional[schemas.SurveyInput], and adjust logic to use survey_data.dict() if provided.
-- [x] Update app/main.py: Change incomplete profile response to return schemas.IncompleteProfileError instead of JSONResponse.
-- [x] Update app/services.py: Replace print statements with proper logging and improve OCR parsing robustness.
-- [x] Test the application by running uvicorn and using the simulator.
-- [x] Add confidence scores to responses.
-- [x] Create comprehensive README.md with setup, architecture, API usage, and examples.
-- [x] Add Docker support with Dockerfile, docker-compose.yml, and preload_models.py for deployment.
-- [x] Add health check endpoint.
-- [x] Update .dockerignore for efficient builds.
