@@ -18,6 +18,19 @@
 
 ---
 
+## 🌍 Real-World Problem Statement (The "Why")
+
+**The Problem:**
+Preventive healthcare is often inaccessible due to high costs, long wait times for specialist appointments, and a reactive medical system that treats diseases only after symptoms appear. Millions of people suffer from preventable cardiovascular issues simply because they lack early warning signals.
+
+**The Solution:**
+This project democratizes health insights by providing an **instant, free, and privacy-focused risk assessment**. By using AI to analyze lifestyle factors (diet, sleep, stress) alongside physical metrics, it empowers users to take proactive steps *before* they need a doctor.
+
+**Why Now?**
+With the rising prevalence of heart disease in younger populations (20s & 30s) due to sedentary modern lifestyles, a tool that can "translate" daily habits into health risks is critical for early intervention.
+
+---
+
 ## 💼 Resume Bullets (Copy-Paste Ready)
 
 ### For AI/ML Engineer Roles:
